@@ -37,8 +37,7 @@ jobs:
       - name: Prepare app files
         run: |
           mkdir -p www
-          cp index.html app.js style.css manifest.webmanifest sw.js www/
-
+          cp index.html app.js style.css manifest.webmanifest sw.js IMG_20261103_072219_434.png www/
       - name: Add Android platform
         run: npx cap add android
 

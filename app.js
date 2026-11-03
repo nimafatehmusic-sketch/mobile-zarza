@@ -5,7 +5,39 @@ function load(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{ret
 function save(){localStorage.setItem(KEY,JSON.stringify(repairs));render()}
 function digits(s){return String(s??"").replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))}
 function faNum(n){return Number(n||0).toLocaleString("fa-IR")}
-function jalali(iso){if(!iso)return "—";const d=new Date(iso+"T12:00:00");return new Intl.DateTimeFormat("fa-IR-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
+function jalali(iso){
+ if(!iso)return "—";
+ const [y,m,d]=iso.split("-").map(Number);
+ const date=new Date(Date.UTC(y,m-1,d,12));
+ return new Intl.DateTimeFormat("fa-IR-u-ca-persian",{
+  year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"
+ }).format(date);
+}
+
+function jalaliToISO(value){
+ const s=String(value||"")
+ .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+ .replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
+ const match=s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+ if(!match)throw new Error("تاریخ را به شکل ۱۴۰۵/۰۸/۱۲ وارد کنید");
+ const jy=Number(match[1]),jm=Number(match[2]),jd=Number(match[3]);
+ if(jm<1||jm>12||jd<1||jd>31)throw new Error("تاریخ شمسی معتبر نیست");
+ const gy=jy+621+Math.floor((jm+2)/12);
+ const gm=(jm+2)%12;
+ const base=Date.UTC(gy,gm,jd,12);
+ for(let i=-3;i<=3;i++){
+  const dt=new Date(base+i*86400000);
+  const parts=new Intl.DateTimeFormat("en-u-ca-persian",{
+   year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"
+  }).formatToParts(dt);
+  const p={};
+  parts.forEach(x=>{if(x.type!=="literal")p[x.type]=Number(x.value)});
+  if(p.year===jy&&p.month===jm&&p.day===jd){
+   return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`;
+  }
+ }
+ throw new Error("تاریخ شمسی معتبر نیست");
+}
 function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2300)}
 function newInvoice(){return "MZ-"+Date.now().toString().slice(-8)}

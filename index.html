@@ -22,8 +22,12 @@
 <label>برند و مدل<input id="model" placeholder="مثلاً Samsung A54"></label>
 <label>نوع تعمیر / خدمات انجام‌شده *<input id="repairType" required placeholder="مثلاً تعویض ال‌سی‌دی"></label>
 <label>وضعیت<select id="status"><option>در انتظار بررسی</option><option>در حال تعمیر</option><option>آماده تحویل</option><option>تحویل‌شده</option></select></label>
-<label>تاریخ پذیرش<input id="received" type="date" required></label>
-<label>تاریخ تحویل<input id="deliveredDate" type="date"></label>
+<label>تاریخ پذیرش (شمسی)
+<input id="received" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲" required>
+</label>
+<label>تاریخ تحویل (شمسی)
+<input id="deliveredDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲">
+</label>
 <label>هزینه (تومان)<input id="price" type="number" min="0" inputmode="numeric" placeholder="۰"></label>
 <label>مبلغ پرداخت‌شده (تومان)<input id="paid" type="number" min="0" inputmode="numeric" placeholder="۰"></label>
 </div>

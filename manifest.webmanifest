@@ -1,0 +1,11 @@
+{
+  "name": "موبایل زرزا - مدیریت تعمیرات",
+  "short_name": "موبایل زرزا",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f6f5",
+  "theme_color": "#123b35"
+}

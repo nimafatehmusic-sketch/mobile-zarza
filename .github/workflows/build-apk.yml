@@ -1,3 +1,4 @@
+
 name: Build Mobile Zarza APK
 
 on:
@@ -25,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: 21
 
-            - name: Setup Android SDK
+      - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools'

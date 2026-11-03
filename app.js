@@ -255,7 +255,26 @@ function showInvoice(r){
  `).join("")}
  <p style="text-align:center;margin-top:24px">از اعتماد شما سپاسگزاریم</p>
  `;
+ const actions = document.querySelector("#invoice .actions.no-print");
+ let smsButton = document.getElementById("sendCustomerSms");
 
+ if (!smsButton) {
+   smsButton = document.createElement("button");
+   smsButton.id = "sendCustomerSms";
+   smsButton.type = "button";
+   smsButton.className = "primary";
+   smsButton.textContent = "ارسال پیامک به مشتری";
+   actions.insertBefore(smsButton, actions.firstChild);
+ }
+
+ smsButton.onclick = () => {
+   const phone = digits(r.phone).replace(/[^\d+]/g, "");
+   const message =
+     `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${r.invoice}. برای پیگیری وضعیت تعمیر، این کد را نزد خود نگه دارید.`;
+
+   window.location.href =
+     `sms:${phone}?body=${encodeURIComponent(message)}`;
+ };
  $("invoice").showModal();
 }
 

@@ -40,7 +40,12 @@ jobs:
           cp index.html app.js style.css manifest.webmanifest sw.js IMG_20261103_072219_434.png www/
       - name: Add Android platform
         run: npx cap add android
-
+      - name: Generate Android app icons
+        run: |
+          mkdir -p assets
+          cp IMG_20261103_072219_434.png assets/logo.png
+          npm install --no-save @capacitor/assets
+          npx @capacitor/assets generate --android
       - name: Sync Android
         run: npx cap sync android
 

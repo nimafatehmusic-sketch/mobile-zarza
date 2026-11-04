@@ -549,3 +549,21 @@ dialog::backdrop {
   margin: 0 !important;
   padding: 0 !important;
 }
+/* وسط‌چین کردن عنوان موبایل زرزا */
+header {
+  position: relative !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+header > div {
+  width: 100%;
+  text-align: center !important;
+}
+
+header .offline {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}

@@ -443,8 +443,7 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
 $("received").value=todayJalali();
 $("deliveredDate").value=$("received").value;
 
-bindMoneyInput("price");
-bindMoneyInput("paid");
+
 
 render();
                           

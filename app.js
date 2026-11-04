@@ -529,8 +529,12 @@ function showInvoice(record) {
     `).join("")}
 
     <p style="text-align:center;margin-top:24px">
-      از اعتماد شما سپاسگزاریم
-    </p>
+  از اعتماد شما سپاسگزاریم
+</p>
+
+<p style="text-align:center;margin-top:12px;font-weight:bold;font-size:16px">
+  مهندس زرزا
+</p>
   `;
 
   const actions = document.querySelector("#invoice .actions.no-print");

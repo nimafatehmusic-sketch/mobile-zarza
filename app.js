@@ -1,23 +1,30 @@
+
 const KEY="mobile-zarza-repairs-v1";
 const $=id=>document.getElementById(id);
 let repairs=load();
+let deliveryDayEdited=false;
 
 function load(){
  try{return JSON.parse(localStorage.getItem(KEY)||"[]")}
  catch{return []}
 }
+
 function save(){
  localStorage.setItem(KEY,JSON.stringify(repairs));
  render();
 }
+
 function digits(s){
  return String(s??"")
  .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
  .replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
 }
+
 function faNum(n){
  return Number(n||0).toLocaleString("fa-IR");
-}function moneyValue(id){
+}
+
+function moneyValue(id){
  return Number(digits($(id).value).replace(/[^\d]/g,"")||0);
 }
 
@@ -28,16 +35,20 @@ function formatMoney(value){
 
 function bindMoneyInput(id){
  const input=$(id);
+
  input.addEventListener("focus",()=>{
   input.value=digits(input.value).replace(/[^\d]/g,"");
  });
+
  input.addEventListener("blur",()=>{
   input.value=formatMoney(input.value);
  });
 }
+
 const persianFormatter=new Intl.DateTimeFormat("en-US-u-ca-persian-nu-latn",{
  year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"
 });
+
 function persianParts(date){
  const p={};
  persianFormatter.formatToParts(date).forEach(x=>{
@@ -45,12 +56,15 @@ function persianParts(date){
  });
  return p;
 }
+
 function pad(n){
  return String(n).padStart(2,"0");
 }
+
 function jalaliToISO(value){
  const s=digits(value).trim();
  const match=s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+
  if(!match)throw new Error("تاریخ را مثل ۱۴۰۵/۰۸/۱۲ وارد کنید");
 
  const jy=Number(match[1]);
@@ -71,13 +85,16 @@ function jalaliToISO(value){
    return `${date.getUTCFullYear()}-${pad(date.getUTCMonth()+1)}-${pad(date.getUTCDate())}`;
   }
  }
+
  throw new Error("این تاریخ شمسی وجود ندارد");
 }
-function isoToJalali(value){
- if(!value)return "—";
- const s=digits(value).trim();
 
+function isoToJalali(value){
+ if(!value)return "";
+
+ const s=digits(value).trim();
  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
  if(iso){
   const date=new Date(Date.UTC(
    Number(iso[1]),Number(iso[2])-1,Number(iso[3]),12
@@ -91,9 +108,11 @@ function isoToJalali(value){
 
  return s;
 }
+
 function jalali(value){
- return isoToJalali(value);
+ return isoToJalali(value)||"—";
 }
+
 function todayJalali(){
  const now=new Date();
  const date=new Date(Date.UTC(
@@ -102,25 +121,75 @@ function todayJalali(){
  const p=persianParts(date);
  return `${p.year}/${pad(p.month)}/${pad(p.day)}`;
 }
+
+function syncDeliveryDate(){
+ const received=digits($("received").value).trim()
+  .match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+
+ if(!received)return;
+
+ const current=digits($("deliveredDate").value).trim();
+ const currentDay=current.includes("/")
+  ?current.slice(current.lastIndexOf("/")+1).replace(/[^\d]/g,"").slice(0,2)
+  :"";
+
+ const day=deliveryDayEdited&&currentDay
+  ?currentDay
+  :received[3];
+
+ $("deliveredDate").value=
+  `${received[1]}/${pad(Number(received[2]))}/${day}`;
+}
+
+function focusDeliveryDay(){
+ if(!$("deliveredDate").value.trim()){
+  $("deliveredDate").value=$("received").value;
+ }
+
+ const end=$("deliveredDate").value.length;
+ $("deliveredDate").setSelectionRange(
+  Math.max(0,end-2),end
+ );
+}
+
+function finishDeliveryDay(){
+ const value=digits($("deliveredDate").value);
+ const received=digits($("received").value)
+  .match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+
+ if(!received)return;
+
+ const day=value.slice(value.lastIndexOf("/")+1).replace(/[^\d]/g,"");
+
+ $("deliveredDate").value=
+  `${received[1]}/${pad(Number(received[2]))}/${pad(Number(day||received[3]))}`;
+}
+
 function toast(msg){
  $("toast").textContent=msg;
  $("toast").classList.add("show");
  setTimeout(()=>$("toast").classList.remove("show"),2300);
 }
+
 function newInvoice(){
  return "MZ-"+Date.now().toString().slice(-8);
 }
+
 function escapeHTML(s){
  return String(s??"").replace(/[&<>"']/g,c=>({
   "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
  }[c]));
 }
+
 function resetForm(){
  HTMLFormElement.prototype.reset.call($("repairForm"));
  $("editId").value="";
  $("formTitle").textContent="ثبت پذیرش جدید";
  $("received").value=todayJalali();
+ $("deliveredDate").value=$("received").value;
+ deliveryDayEdited=false;
 }
+
 function render(){
  $("total").textContent=faNum(repairs.length);
  $("working").textContent=faNum(repairs.filter(x=>x.status==="در حال تعمیر").length);
@@ -146,7 +215,10 @@ function render(){
    فاکتور: <b>${escapeHTML(r.invoice)}</b><br>
    تماس: ${escapeHTML(r.phone)}<br>
    تعمیر: ${escapeHTML(r.repairType)}<br>
-   پذیرش: ${jalali(r.received)} | هزینه: ${faNum(r.price)} تومان
+   پذیرش: ${jalali(r.received)}<br>
+   تحویل: ${jalali(r.deliveredDate)}<br>
+   هزینه: ${faNum(r.price)} تومان<br>
+   پرداخت‌شده: ${faNum(r.paid)} تومان
   </p>
   <div class="record-actions">
    <button class="primary" data-action="invoice" data-id="${r.id}">فاکتور / چاپ</button>
@@ -191,8 +263,8 @@ $("repairForm").addEventListener("submit",e=>{
    status:$("status").value,
    received,
    deliveredDate,
-   price:Number($("price").value||0),
-   paid:Number($("paid").value||0),
+   price:moneyValue("price"),
+   paid:moneyValue("paid"),
    notes:$("notes").value.trim()
   };
 
@@ -212,6 +284,26 @@ $("reset").addEventListener("click",resetForm);
 $("search").addEventListener("input",render);
 $("filter").addEventListener("change",render);
 
+$("received").addEventListener("input",()=>{
+ if(deliveryDayEdited){
+  syncDeliveryDate();
+ }else{
+  $("deliveredDate").value=$("received").value;
+ }
+});
+
+$("deliveredDate").addEventListener("focus",focusDeliveryDay);
+
+$("deliveredDate").addEventListener("input",()=>{
+ deliveryDayEdited=true;
+ syncDeliveryDate();
+});
+
+$("deliveredDate").addEventListener("blur",finishDeliveryDay);
+
+bindMoneyInput("price");
+bindMoneyInput("paid");
+
 $("records").addEventListener("click",e=>{
  const b=e.target.closest("button[data-action]");
  if(!b)return;
@@ -229,12 +321,22 @@ $("records").addEventListener("click",e=>{
 
  if(b.dataset.action==="edit"){
   ["customer","phone","device","model","repairType","status",
-   "price","paid","notes"].forEach(k=>$(k).value=r[k]??"");
+   "notes"].forEach(k=>$(k).value=r[k]??"");
+
+  $("price").value=formatMoney(r.price);
+  $("paid").value=formatMoney(r.paid);
 
   $("received").value=isoToJalali(r.received);
   $("deliveredDate").value=r.deliveredDate
    ?isoToJalali(r.deliveredDate)
-   :"";
+   :$("received").value;
+
+  const receivedDay=Number(digits($("received").value).split("/")[2]||0);
+  const savedDeliveryDay=Number(digits($("deliveredDate").value).split("/")[2]||0);
+
+  deliveryDayEdited=Boolean(r.deliveredDate)&&savedDeliveryDay!==receivedDay;
+
+  syncDeliveryDate();
 
   $("editId").value=r.id;
   $("formTitle").textContent="ویرایش تعمیر";
@@ -272,26 +374,28 @@ function showInvoice(r){
  `).join("")}
  <p style="text-align:center;margin-top:24px">از اعتماد شما سپاسگزاریم</p>
  `;
- const actions = document.querySelector("#invoice .actions.no-print");
- let smsButton = document.getElementById("sendCustomerSms");
 
- if (!smsButton) {
-   smsButton = document.createElement("button");
-   smsButton.id = "sendCustomerSms";
-   smsButton.type = "button";
-   smsButton.className = "primary";
-   smsButton.textContent = "ارسال پیامک به مشتری";
-   actions.insertBefore(smsButton, actions.firstChild);
+ const actions=document.querySelector("#invoice .actions.no-print");
+ let smsButton=document.getElementById("sendCustomerSms");
+
+ if(!smsButton){
+  smsButton=document.createElement("button");
+  smsButton.id="sendCustomerSms";
+  smsButton.type="button";
+  smsButton.className="primary";
+  smsButton.textContent="ارسال پیامک به مشتری";
+  actions.insertBefore(smsButton,actions.firstChild);
  }
 
- smsButton.onclick = () => {
-   const phone = digits(r.phone).replace(/[^\d+]/g, "");
-   const message =
-     `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${r.invoice}. برای پیگیری وضعیت تعمیر، این کد را نزد خود نگه دارید.`;
+ smsButton.onclick=()=>{
+  const phone=digits(r.phone).replace(/[^\d+]/g,"");
+  const message=
+   `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${r.invoice}. برای پیگیری وضعیت تعمیر، این کد را نزد خود نگه دارید.`;
 
-   window.location.href =
-     `sms:${phone}?body=${encodeURIComponent(message)}`;
+  window.location.href=
+   `sms:${phone}?body=${encodeURIComponent(message)}`;
  };
+
  $("invoice").showModal();
 }
 
@@ -317,6 +421,7 @@ $("importFile").addEventListener("change",async e=>{
  try{
   const data=JSON.parse(await file.text());
   const arr=Array.isArray(data)?data:data.repairs;
+
   if(!Array.isArray(arr))throw Error();
 
   if(confirm("اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟")){
@@ -327,6 +432,7 @@ $("importFile").addEventListener("change",async e=>{
  }catch{
   alert("فایل پشتیبان معتبر نیست");
  }
+
  e.target.value="";
 });
 
@@ -335,4 +441,10 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
 }
 
 $("received").value=todayJalali();
+$("deliveredDate").value=$("received").value;
+
+bindMoneyInput("price");
+bindMoneyInput("paid");
+
 render();
+                          

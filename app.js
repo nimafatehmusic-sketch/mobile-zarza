@@ -99,7 +99,7 @@ function escapeHTML(s){
  }[c]));
 }
 function resetForm(){
- $("repairForm").reset();
+ HTMLFormElement.prototype.reset.call($("repairForm"));
  $("editId").value="";
  $("formTitle").textContent="ثبت پذیرش جدید";
  $("received").value=todayJalali();

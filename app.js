@@ -1,449 +1,621 @@
+const KEY = "mobile-zarza-repairs-v1";
+const $ = id => document.getElementById(id);
 
-const KEY="mobile-zarza-repairs-v1";
-const $=id=>document.getElementById(id);
-let repairs=load();
-let deliveryDayEdited=false;
+let repairs = load();
+let deliveryDayEdited = false;
 
-function load(){
- try{return JSON.parse(localStorage.getItem(KEY)||"[]")}
- catch{return []}
-}
-
-function save(){
- localStorage.setItem(KEY,JSON.stringify(repairs));
- render();
-}
-
-function digits(s){
- return String(s??"")
- .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
- .replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d));
-}
-
-function faNum(n){
- return Number(n||0).toLocaleString("fa-IR");
-}
-
-function moneyValue(id){
- return Number(digits($(id).value).replace(/[^\d]/g,"")||0);
-}
-
-function formatMoney(value){
- const raw=digits(value).replace(/[^\d]/g,"");
- return raw?Number(raw).toLocaleString("fa-IR"):"";
-}
-
-function bindMoneyInput(id){
- const input=$(id);
-
- input.addEventListener("focus",()=>{
-  input.value=digits(input.value).replace(/[^\d]/g,"");
- });
-
- input.addEventListener("blur",()=>{
-  input.value=formatMoney(input.value);
- });
-}
-
-const persianFormatter=new Intl.DateTimeFormat("en-US-u-ca-persian-nu-latn",{
- year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"
-});
-
-function persianParts(date){
- const p={};
- persianFormatter.formatToParts(date).forEach(x=>{
-  if(x.type!=="literal")p[x.type]=Number(x.value);
- });
- return p;
-}
-
-function pad(n){
- return String(n).padStart(2,"0");
-}
-
-function jalaliToISO(value){
- const s=digits(value).trim();
- const match=s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
-
- if(!match)throw new Error("تاریخ را مثل ۱۴۰۵/۰۸/۱۲ وارد کنید");
-
- const jy=Number(match[1]);
- const jm=Number(match[2]);
- const jd=Number(match[3]);
-
- if(jy<1200||jy>1600||jm<1||jm>12||jd<1||jd>31){
-  throw new Error("تاریخ شمسی معتبر نیست");
- }
-
- const start=Date.UTC(jy+621,2,19,12);
-
- for(let i=0;i<370;i++){
-  const date=new Date(start+i*86400000);
-  const p=persianParts(date);
-
-  if(p.year===jy&&p.month===jm&&p.day===jd){
-   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth()+1)}-${pad(date.getUTCDate())}`;
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || "[]");
+  } catch {
+    return [];
   }
- }
-
- throw new Error("این تاریخ شمسی وجود ندارد");
 }
 
-function isoToJalali(value){
- if(!value)return "";
-
- const s=digits(value).trim();
- const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-
- if(iso){
-  const date=new Date(Date.UTC(
-   Number(iso[1]),Number(iso[2])-1,Number(iso[3]),12
-  ));
-  const p=persianParts(date);
-  return `${p.year}/${pad(p.month)}/${pad(p.day)}`;
- }
-
- const j=s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
- if(j)return `${j[1]}/${pad(j[2])}/${pad(j[3])}`;
-
- return s;
+function save() {
+  localStorage.setItem(KEY, JSON.stringify(repairs));
+  render();
 }
 
-function jalali(value){
- return isoToJalali(value)||"—";
+function digits(value) {
+  return String(value ?? "")
+    .replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+    .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
 }
 
-function todayJalali(){
- const now=new Date();
- const date=new Date(Date.UTC(
-  now.getFullYear(),now.getMonth(),now.getDate(),12
- ));
- const p=persianParts(date);
- return `${p.year}/${pad(p.month)}/${pad(p.day)}`;
+function faNum(value) {
+  return Number(value || 0).toLocaleString("fa-IR");
 }
 
-function syncDeliveryDate(){
- const received=digits($("received").value).trim()
-  .match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
-
- if(!received)return;
-
- const current=digits($("deliveredDate").value).trim();
- const currentDay=current.includes("/")
-  ?current.slice(current.lastIndexOf("/")+1).replace(/[^\d]/g,"").slice(0,2)
-  :"";
-
- const day=deliveryDayEdited&&currentDay
-  ?currentDay
-  :received[3];
-
- $("deliveredDate").value=
-  `${received[1]}/${pad(Number(received[2]))}/${day}`;
+function moneyValue(id) {
+  return Number(digits($(id).value).replace(/[^\d]/g, "") || 0);
 }
 
-function focusDeliveryDay(){
- if(!$("deliveredDate").value.trim()){
-  $("deliveredDate").value=$("received").value;
- }
-
- const end=$("deliveredDate").value.length;
- $("deliveredDate").setSelectionRange(
-  Math.max(0,end-2),end
- );
+function formatMoney(value) {
+  const raw = digits(value).replace(/[^\d]/g, "");
+  return raw ? Number(raw).toLocaleString("fa-IR") : "";
 }
 
-function finishDeliveryDay(){
- const value=digits($("deliveredDate").value);
- const received=digits($("received").value)
-  .match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+function bindMoneyInput(id) {
+  const input = $(id);
 
- if(!received)return;
+  input.addEventListener("focus", () => {
+    input.value = digits(input.value).replace(/[^\d]/g, "");
+  });
 
- const day=value.slice(value.lastIndexOf("/")+1).replace(/[^\d]/g,"");
-
- $("deliveredDate").value=
-  `${received[1]}/${pad(Number(received[2]))}/${pad(Number(day||received[3]))}`;
+  input.addEventListener("blur", () => {
+    input.value = formatMoney(input.value);
+  });
 }
 
-function toast(msg){
- $("toast").textContent=msg;
- $("toast").classList.add("show");
- setTimeout(()=>$("toast").classList.remove("show"),2300);
+const persianFormatter = new Intl.DateTimeFormat(
+  "en-US-u-ca-persian-nu-latn",
+  {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    timeZone: "UTC"
+  }
+);
+
+function persianParts(date) {
+  const parts = {};
+  persianFormatter.formatToParts(date).forEach(part => {
+    if (part.type !== "literal") {
+      parts[part.type] = Number(part.value);
+    }
+  });
+  return parts;
 }
 
-function newInvoice(){
- return "MZ-"+Date.now().toString().slice(-8);
+function pad(number) {
+  return String(number).padStart(2, "0");
 }
 
-function escapeHTML(s){
- return String(s??"").replace(/[&<>"']/g,c=>({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- }[c]));
-}
-
-function resetForm(){
- HTMLFormElement.prototype.reset.call($("repairForm"));
- $("editId").value="";
- $("formTitle").textContent="ثبت پذیرش جدید";
- $("received").value=todayJalali();
- $("deliveredDate").value=$("received").value;
- deliveryDayEdited=false;
-}
-
-function render(){
- $("total").textContent=faNum(repairs.length);
- $("working").textContent=faNum(repairs.filter(x=>x.status==="در حال تعمیر").length);
- $("ready").textContent=faNum(repairs.filter(x=>x.status==="آماده تحویل").length);
- $("delivered").textContent=faNum(repairs.filter(x=>x.status==="تحویل‌شده").length);
-
- const q=digits($("search").value).trim().toLowerCase();
- const f=$("filter").value;
-
- const list=repairs.filter(r=>
-  (!f||r.status===f)&&
-  (!q||[r.customer,r.phone,r.invoice,r.model,r.repairType]
-   .some(v=>digits(v).toLowerCase().includes(q)))
- ).sort((a,b)=>b.created-a.created);
-
- $("records").innerHTML=list.length?list.map(r=>`
- <article class="record">
-  <div class="record-head">
-   <h3>${escapeHTML(r.customer)} — ${escapeHTML(r.model||"گوشی موبایل")}</h3>
-   <span class="status">${escapeHTML(r.status)}</span>
-  </div>
-  <p>
-   فاکتور: <b>${escapeHTML(r.invoice)}</b><br>
-   تماس: ${escapeHTML(r.phone)}<br>
-   تعمیر: ${escapeHTML(r.repairType)}<br>
-   پذیرش: ${jalali(r.received)}<br>
-   تحویل: ${jalali(r.deliveredDate)}<br>
-   هزینه: ${faNum(r.price)} تومان<br>
-   پرداخت‌شده: ${faNum(r.paid)} تومان
-  </p>
-  <div class="record-actions">
-   <button class="primary" data-action="invoice" data-id="${r.id}">فاکتور / چاپ</button>
-   <button class="secondary" data-action="edit" data-id="${r.id}">ویرایش</button>
-   <button class="secondary" data-action="delete" data-id="${r.id}">حذف</button>
-  </div>
- </article>
- `).join(""):'<p class="hint">هنوز موردی ثبت نشده یا نتیجه‌ای پیدا نشد.</p>';
-}
-
-document.querySelectorAll(".tab").forEach(b=>{
- b.addEventListener("click",()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));
-  ["new","list","backup"].forEach(id=>
-   $(id).classList.toggle("hidden",id!==b.dataset.tab)
+function jalaliToISO(value) {
+  const match = digits(value).trim().match(
+    /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/
   );
-  if(b.dataset.tab==="list")render();
- });
+
+  if (!match) {
+    throw new Error("تاریخ را مثل ۱۴۰۵/۰۸/۱۲ وارد کنید");
+  }
+
+  const jy = Number(match[1]);
+  const jm = Number(match[2]);
+  const jd = Number(match[3]);
+
+  if (jy < 1200 || jy > 1600 || jm < 1 || jm > 12 || jd < 1 || jd > 31) {
+    throw new Error("تاریخ شمسی معتبر نیست");
+  }
+
+  const start = Date.UTC(jy + 621, 2, 19, 12);
+
+  for (let i = 0; i < 370; i++) {
+    const date = new Date(start + i * 86400000);
+    const parts = persianParts(date);
+
+    if (parts.year === jy && parts.month === jm && parts.day === jd) {
+      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+    }
+  }
+
+  throw new Error("این تاریخ شمسی وجود ندارد");
+}
+
+function isoToJalali(value) {
+  if (!value) return "";
+
+  const s = digits(value).trim();
+  const match = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (match) {
+    const date = new Date(Date.UTC(
+      Number(match[1]),
+      Number(match[2]) - 1,
+      Number(match[3]),
+      12
+    ));
+
+    const parts = persianParts(date);
+    return `${parts.year}/${pad(parts.month)}/${pad(parts.day)}`;
+  }
+
+  const j = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if (j) return `${j[1]}/${pad(j[2])}/${pad(j[3])}`;
+
+  return s;
+}
+
+function jalali(value) {
+  return isoToJalali(value) || "—";
+}
+
+function todayJalali() {
+  const now = new Date();
+  const date = new Date(Date.UTC(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    12
+  ));
+
+  const parts = persianParts(date);
+  return `${parts.year}/${pad(parts.month)}/${pad(parts.day)}`;
+}
+
+function toast(message) {
+  $("toast").textContent = message;
+  $("toast").classList.add("show");
+  setTimeout(() => $("toast").classList.remove("show"), 2300);
+}
+
+function newInvoice() {
+  return "MZ-" + Date.now().toString().slice(-8);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
+}
+
+// نوع دستگاه انتخاب‌شده
+function selectedDevice() {
+  const radio = document.querySelector(
+    'input[name="deviceChoice"]:checked'
+  );
+
+  return radio ? radio.value : "گوشی موبایل";
+}
+
+// هماهنگ‌سازی نوع دستگاه
+function syncDevice() {
+  $("device").value = selectedDevice();
+}
+
+document.querySelectorAll('input[name="deviceChoice"]').forEach(radio => {
+  radio.addEventListener("change", syncDevice);
 });
 
-$("repairForm").addEventListener("submit",e=>{
- e.preventDefault();
+// دریافت تعمیرات انتخاب‌شده
+function selectedRepairTypes() {
+  return Array.from(
+    document.querySelectorAll(".repair-option:checked")
+  ).map(input => input.value);
+}
 
- try{
-  const id=$("editId").value;
-  const old=repairs.find(x=>x.id===id);
+// ترکیب خدمات انتخابی و خدمات دلخواه
+function getRepairDescription() {
+  const selected = selectedRepairTypes();
+  const custom = $("repairTypeCustom").value.trim();
 
-  const received=jalaliToISO($("received").value);
-  const deliveredDate=$("deliveredDate").value.trim()
-   ?jalaliToISO($("deliveredDate").value)
-   :"";
+  if (custom) selected.push(custom);
 
-  const r={
-   id:id||crypto.randomUUID(),
-   invoice:old?.invoice||newInvoice(),
-   created:old?.created||Date.now(),
-   customer:$("customer").value.trim(),
-   phone:$("phone").value.trim(),
-   device:$("device").value,
-   model:$("model").value.trim(),
-   repairType:$("repairType").value.trim(),
-   status:$("status").value,
-   received,
-   deliveredDate,
-   price:moneyValue("price"),
-   paid:moneyValue("paid"),
-   notes:$("notes").value.trim()
-  };
+  return selected.join("، ");
+}
 
-  if(old)repairs=repairs.map(x=>x.id===id?r:x);
-  else repairs.push(r);
+// بازگرداندن تعمیرات قبلی هنگام ویرایش
+function restoreRepairTypes(value) {
+  document.querySelectorAll(".repair-option").forEach(input => {
+    input.checked = false;
+  });
 
-  save();
-  resetForm();
-  toast(old?"اطلاعات ویرایش شد":"تعمیر با شماره فاکتور "+r.invoice+" ثبت شد");
+  $("repairTypeCustom").value = "";
 
- }catch(error){
-  alert(error.message||"لطفاً تاریخ را بررسی کنید");
- }
+  const parts = String(value || "")
+    .split(/[،,]/)
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  const remaining = [];
+
+  parts.forEach(part => {
+    const checkbox = Array.from(
+      document.querySelectorAll(".repair-option")
+    ).find(input => input.value === part);
+
+    if (checkbox) {
+      checkbox.checked = true;
+    } else {
+      remaining.push(part);
+    }
+  });
+
+  $("repairTypeCustom").value = remaining.join("، ");
+}
+
+function resetForm() {
+  HTMLFormElement.prototype.reset.call($("repairForm"));
+
+  $("editId").value = "";
+  $("formTitle").textContent = "ثبت پذیرش جدید";
+
+  document.querySelectorAll('input[name="deviceChoice"]').forEach(radio => {
+    radio.checked = radio.value === "گوشی موبایل";
+  });
+
+  $("device").value = "گوشی موبایل";
+
+  document.querySelectorAll(".repair-option").forEach(input => {
+    input.checked = false;
+  });
+
+  $("repairTypeCustom").value = "";
+
+  $("received").value = todayJalali();
+  $("deliveredDate").value = $("received").value;
+
+  deliveryDayEdited = false;
+}
+
+// تغییر خودکار تاریخ تحویل
+$("received").addEventListener("input", () => {
+  if (!deliveryDayEdited) {
+    $("deliveredDate").value = $("received").value;
+  }
 });
 
-$("reset").addEventListener("click",resetForm);
-$("search").addEventListener("input",render);
-$("filter").addEventListener("change",render);
+$("deliveredDate").addEventListener("focus", () => {
+  if (!$("deliveredDate").value.trim()) {
+    $("deliveredDate").value = $("received").value;
+  }
 
-$("received").addEventListener("input",()=>{
- if(deliveryDayEdited){
-  syncDeliveryDate();
- }else{
-  $("deliveredDate").value=$("received").value;
- }
+  const end = $("deliveredDate").value.length;
+  $("deliveredDate").setSelectionRange(
+    Math.max(0, end - 2),
+    end
+  );
 });
 
-$("deliveredDate").addEventListener("focus",focusDeliveryDay);
-
-$("deliveredDate").addEventListener("input",()=>{
- deliveryDayEdited=true;
- syncDeliveryDate();
+$("deliveredDate").addEventListener("input", () => {
+  deliveryDayEdited = true;
 });
 
-$("deliveredDate").addEventListener("blur",finishDeliveryDay);
+$("deliveredDate").addEventListener("blur", () => {
+  const received = digits($("received").value).match(
+    /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/
+  );
 
+  if (!received) return;
+
+  const value = digits($("deliveredDate").value);
+  const day = value.slice(value.lastIndexOf("/") + 1)
+    .replace(/[^\d]/g, "");
+
+  $("deliveredDate").value =
+    `${received[1]}/${pad(Number(received[2]))}/${pad(Number(day || received[3]))}`;
+});
+
+// فرمت هزینه‌ها
 bindMoneyInput("price");
 bindMoneyInput("paid");
 
-$("records").addEventListener("click",e=>{
- const b=e.target.closest("button[data-action]");
- if(!b)return;
+// تغییر تب‌ها
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(item => {
+      item.classList.toggle("active", item === button);
+    });
 
- const r=repairs.find(x=>x.id===b.dataset.id);
- if(!r)return;
+    ["new", "list", "backup"].forEach(id => {
+      $(id).classList.toggle("hidden", id !== button.dataset.tab);
+    });
 
- if(b.dataset.action==="delete"){
-  if(confirm("این مورد حذف شود؟")){
-   repairs=repairs.filter(x=>x.id!==r.id);
-   save();
-   toast("حذف شد");
-  }
- }
-
- if(b.dataset.action==="edit"){
-  ["customer","phone","device","model","repairType","status",
-   "notes"].forEach(k=>$(k).value=r[k]??"");
-
-  $("price").value=formatMoney(r.price);
-  $("paid").value=formatMoney(r.paid);
-
-  $("received").value=isoToJalali(r.received);
-  $("deliveredDate").value=r.deliveredDate
-   ?isoToJalali(r.deliveredDate)
-   :$("received").value;
-
-  const receivedDay=Number(digits($("received").value).split("/")[2]||0);
-  const savedDeliveryDay=Number(digits($("deliveredDate").value).split("/")[2]||0);
-
-  deliveryDayEdited=Boolean(r.deliveredDate)&&savedDeliveryDay!==receivedDay;
-
-  syncDeliveryDate();
-
-  $("editId").value=r.id;
-  $("formTitle").textContent="ویرایش تعمیر";
-  document.querySelector('[data-tab="new"]').click();
-  window.scrollTo({top:0,behavior:"smooth"});
- }
-
- if(b.dataset.action==="invoice")showInvoice(r);
+    if (button.dataset.tab === "list") render();
+  });
 });
 
-function showInvoice(r){
- $("invoiceContent").innerHTML=`
- <div class="invoice-title">
-  <h2>موبایل زرزا</h2>
-  <b>فاکتور پذیرش تعمیرات</b>
- </div>
- ${[
-  ["شماره فاکتور",r.invoice],
-  ["نام مشتری",r.customer],
-  ["شماره تماس",r.phone],
-  ["نوع دستگاه",r.device||"گوشی موبایل"],
-  ["مدل گوشی",r.model||"—"],
-  ["نوع تعمیر",r.repairType],
-  ["وضعیت",r.status],
-  ["تاریخ پذیرش",jalali(r.received)],
-  ["تاریخ تحویل",jalali(r.deliveredDate)],
-  ["هزینه",faNum(r.price)+" تومان"],
-  ["پرداخت‌شده",faNum(r.paid)+" تومان"],
-  ["مانده",faNum(Math.max(0,r.price-r.paid))+" تومان"],
-  ["توضیحات",r.notes||"—"]
- ].map(([a,b])=>`
-  <div class="invoice-row">
-   <span>${a}</span><b>${escapeHTML(b)}</b>
-  </div>
- `).join("")}
- <p style="text-align:center;margin-top:24px">از اعتماد شما سپاسگزاریم</p>
- `;
+// ذخیره تعمیر جدید یا ویرایش
+$("repairForm").addEventListener("submit", event => {
+  event.preventDefault();
 
- const actions=document.querySelector("#invoice .actions.no-print");
- let smsButton=document.getElementById("sendCustomerSms");
+  try {
+    const id = $("editId").value;
+    const old = repairs.find(item => item.id === id);
 
- if(!smsButton){
-  smsButton=document.createElement("button");
-  smsButton.id="sendCustomerSms";
-  smsButton.type="button";
-  smsButton.className="primary";
-  smsButton.textContent="ارسال پیامک به مشتری";
-  actions.insertBefore(smsButton,actions.firstChild);
- }
+    const repairType = getRepairDescription();
 
- smsButton.onclick=()=>{
-  const phone=digits(r.phone).replace(/[^\d+]/g,"");
-  const message=
-   `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${r.invoice}. برای پیگیری وضعیت تعمیر، این کد را نزد خود نگه دارید.`;
+    if (!repairType) {
+      alert("لطفاً حداقل یک نوع تعمیر را انتخاب کنید یا خدمات دلخواه را بنویسید.");
+      return;
+    }
 
-  window.location.href=
-   `sms:${phone}?body=${encodeURIComponent(message)}`;
- };
+    const received = jalaliToISO($("received").value);
 
- $("invoice").showModal();
+    const deliveredDate = $("deliveredDate").value.trim()
+      ? jalaliToISO($("deliveredDate").value)
+      : "";
+
+    const device = selectedDevice();
+
+    const record = {
+      id: id || (
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : String(Date.now()) + Math.random().toString(16).slice(2)
+      ),
+      invoice: old?.invoice || newInvoice(),
+      created: old?.created || Date.now(),
+      customer: $("customer").value.trim(),
+      phone: $("phone").value.trim(),
+      device,
+      model: $("model").value.trim(),
+      repairType,
+      status: $("status").value,
+      received,
+      deliveredDate,
+      price: moneyValue("price"),
+      paid: moneyValue("paid"),
+      notes: $("notes").value.trim()
+    };
+
+    if (old) {
+      repairs = repairs.map(item => item.id === id ? record : item);
+    } else {
+      repairs.push(record);
+    }
+
+    save();
+    resetForm();
+
+    toast(old
+      ? "اطلاعات ویرایش شد"
+      : "تعمیر با شماره فاکتور " + record.invoice + " ثبت شد"
+    );
+
+  } catch (error) {
+    alert(error.message || "لطفاً اطلاعات را بررسی کنید");
+  }
+});
+
+$("reset").addEventListener("click", resetForm);
+
+// نمایش فهرست تعمیرات
+function render() {
+  $("total").textContent = faNum(repairs.length);
+
+  $("working").textContent = faNum(
+    repairs.filter(item => item.status === "در حال تعمیر").length
+  );
+
+  $("ready").textContent = faNum(
+    repairs.filter(item => item.status === "آماده تحویل").length
+  );
+
+  $("delivered").textContent = faNum(
+    repairs.filter(item => item.status === "تحویل‌شده").length
+  );
+
+  const query = digits($("search").value).trim().toLowerCase();
+  const filter = $("filter").value;
+
+  const list = repairs.filter(record => {
+    const matchesStatus = !filter || record.status === filter;
+
+    const searchable = [
+      record.customer,
+      record.phone,
+      record.invoice,
+      record.model,
+      record.repairType,
+      record.device
+    ];
+
+    const matchesSearch = !query || searchable.some(value =>
+      digits(value).toLowerCase().includes(query)
+    );
+
+    return matchesStatus && matchesSearch;
+  }).sort((a, b) => b.created - a.created);
+
+  $("records").innerHTML = list.length
+    ? list.map(record => `
+      <article class="record">
+        <div class="record-head">
+          <h3>${escapeHTML(record.customer)} — ${escapeHTML(record.model || "بدون مدل")}</h3>
+          <span class="status">${escapeHTML(record.status)}</span>
+        </div>
+
+        <p>
+          فاکتور: <b>${escapeHTML(record.invoice)}</b><br>
+          نوع دستگاه: ${escapeHTML(record.device || "گوشی موبایل")}<br>
+          تماس: ${escapeHTML(record.phone)}<br>
+          تعمیر: ${escapeHTML(record.repairType || "—")}<br>
+          پذیرش: ${jalali(record.received)}<br>
+          تحویل: ${jalali(record.deliveredDate)}<br>
+          هزینه: ${faNum(record.price)} تومان<br>
+          پرداخت‌شده: ${faNum(record.paid)} تومان
+        </p>
+
+        <div class="record-actions">
+          <button class="primary" data-action="invoice" data-id="${escapeHTML(record.id)}">فاکتور / چاپ</button>
+          <button class="secondary" data-action="edit" data-id="${escapeHTML(record.id)}">ویرایش</button>
+          <button class="secondary" data-action="delete" data-id="${escapeHTML(record.id)}">حذف</button>
+        </div>
+      </article>
+    `).join("")
+    : '<p class="hint">هنوز موردی ثبت نشده یا نتیجه‌ای پیدا نشد.</p>';
 }
 
-$("closeInvoice").addEventListener("click",()=>$("invoice").close());
+$("search").addEventListener("input", render);
+$("filter").addEventListener("change", render);
 
-$("export").addEventListener("click",()=>{
- const blob=new Blob([
-  JSON.stringify({app:"mobile-zarza",version:1,repairs},null,2)
- ],{type:"application/json"});
+// عملیات ویرایش، حذف و فاکتور
+$("records").addEventListener("click", event => {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
 
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="mobile-zarza-backup.json";
- a.click();
- URL.revokeObjectURL(a.href);
- toast("فایل پشتیبان آماده شد");
-});
+  const record = repairs.find(item => item.id === button.dataset.id);
+  if (!record) return;
 
-$("importFile").addEventListener("change",async e=>{
- const file=e.target.files[0];
- if(!file)return;
-
- try{
-  const data=JSON.parse(await file.text());
-  const arr=Array.isArray(data)?data:data.repairs;
-
-  if(!Array.isArray(arr))throw Error();
-
-  if(confirm("اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟")){
-   repairs=arr;
-   save();
-   toast("بازیابی انجام شد");
+  if (button.dataset.action === "delete") {
+    if (confirm("این مورد حذف شود؟")) {
+      repairs = repairs.filter(item => item.id !== record.id);
+      save();
+      toast("حذف شد");
+    }
   }
- }catch{
-  alert("فایل پشتیبان معتبر نیست");
- }
 
- e.target.value="";
+  if (button.dataset.action === "edit") {
+    $("customer").value = record.customer || "";
+    $("phone").value = record.phone || "";
+    $("model").value = record.model || "";
+    $("status").value = record.status || "در انتظار بررسی";
+    $("notes").value = record.notes || "";
+
+    document.querySelectorAll('input[name="deviceChoice"]').forEach(radio => {
+      radio.checked = radio.value === (record.device || "گوشی موبایل");
+    });
+
+    $("device").value = record.device || "گوشی موبایل";
+
+    restoreRepairTypes(record.repairType || "");
+
+    $("price").value = formatMoney(record.price);
+    $("paid").value = formatMoney(record.paid);
+
+    $("received").value = isoToJalali(record.received);
+
+    $("deliveredDate").value = record.deliveredDate
+      ? isoToJalali(record.deliveredDate)
+      : $("received").value;
+
+    deliveryDayEdited = Boolean(record.deliveredDate);
+
+    $("editId").value = record.id;
+    $("formTitle").textContent = "ویرایش تعمیر";
+
+    document.querySelector('[data-tab="new"]').click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (button.dataset.action === "invoice") {
+    showInvoice(record);
+  }
 });
 
-if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
- navigator.serviceWorker.register("./sw.js").catch(()=>{});
+// نمایش فاکتور
+function showInvoice(record) {
+  $("invoiceContent").innerHTML = `
+    <div class="invoice-title">
+      <h2>موبایل زرزا</h2>
+      <b>فاکتور پذیرش تعمیرات</b>
+    </div>
+
+    ${[
+      ["شماره فاکتور", record.invoice],
+      ["نام مشتری", record.customer],
+      ["شماره تماس", record.phone],
+      ["نوع دستگاه", record.device || "گوشی موبایل"],
+      ["برند و مدل", record.model || "—"],
+      ["نوع تعمیر و خدمات", record.repairType || "—"],
+      ["وضعیت", record.status],
+      ["تاریخ پذیرش", jalali(record.received)],
+      ["تاریخ تحویل", jalali(record.deliveredDate)],
+      ["هزینه", faNum(record.price) + " تومان"],
+      ["پرداخت‌شده", faNum(record.paid) + " تومان"],
+      ["مانده", faNum(Math.max(0, record.price - record.paid)) + " تومان"],
+      ["توضیحات", record.notes || "—"]
+    ].map(([title, value]) => `
+      <div class="invoice-row">
+        <span>${escapeHTML(title)}</span>
+        <b>${escapeHTML(value)}</b>
+      </div>
+    `).join("")}
+
+    <p style="text-align:center;margin-top:24px">
+      از اعتماد شما سپاسگزاریم
+    </p>
+  `;
+
+  const actions = document.querySelector("#invoice .actions.no-print");
+  let smsButton = document.getElementById("sendCustomerSms");
+
+  if (!smsButton) {
+    smsButton = document.createElement("button");
+    smsButton.id = "sendCustomerSms";
+    smsButton.type = "button";
+    smsButton.className = "primary";
+    smsButton.textContent = "ارسال پیامک به مشتری";
+    actions.insertBefore(smsButton, actions.firstChild);
+  }
+
+  smsButton.onclick = () => {
+    const phone = digits(record.phone).replace(/[^\d+]/g, "");
+
+    const message =
+      `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${record.invoice}. این کد را برای پیگیری نزد خود نگه دارید.`;
+
+    window.location.href =
+      `sms:${phone}?body=${encodeURIComponent(message)}`;
+  };
+
+  $("invoice").showModal();
 }
 
-$("received").value=todayJalali();
-$("deliveredDate").value=$("received").value;
+$("closeInvoice").addEventListener("click", () => {
+  $("invoice").close();
+});
 
+// پشتیبان‌گیری
+$("export").addEventListener("click", () => {
+  const blob = new Blob([
+    JSON.stringify({
+      app: "mobile-zarza",
+      version: 1,
+      repairs
+    }, null, 2)
+  ], { type: "application/json" });
 
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "mobile-zarza-backup.json";
+  link.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast("فایل پشتیبان آماده شد");
+});
+
+// بازیابی پشتیبان
+$("importFile").addEventListener("change", async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  try {
+    const data = JSON.parse(await file.text());
+    const imported = Array.isArray(data) ? data : data.repairs;
+
+    if (!Array.isArray(imported)) {
+      throw new Error("فایل نامعتبر است");
+    }
+
+    if (confirm("اطلاعات فعلی با نسخه پشتیبان جایگزین شود؟")) {
+      repairs = imported;
+      save();
+      toast("بازیابی انجام شد");
+    }
+  } catch {
+    alert("فایل پشتیبان معتبر نیست");
+  }
+
+  event.target.value = "";
+});
+
+// فعال‌سازی حالت آفلاین
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
+
+// شروع برنامه
+$("received").value = todayJalali();
+$("deliveredDate").value = $("received").value;
+$("device").value = selectedDevice();
 
 render();
-                          

@@ -484,3 +484,68 @@ dialog::backdrop {
   margin: 0 !important;
   flex: 0 0 18px !important;
 }
+/* اصلاح کامل تراز انتخاب دستگاه و تعمیرات */
+
+/* گزینه‌های نوع دستگاه */
+.device-options {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.device-option {
+  display: flex !important;
+  flex-direction: row !important;
+  direction: rtl !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  min-height: 48px !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.device-option input[type="radio"] {
+  display: inline-block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  flex: 0 0 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.device-option span,
+.device-option b {
+  margin: 0 !important;
+}
+
+/* گزینه‌های نوع تعمیرات */
+.repair-options {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.repair-options label {
+  display: flex !important;
+  flex-direction: row !important;
+  direction: rtl !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  min-height: 48px !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  text-align: right !important;
+}
+
+.repair-options input[type="checkbox"] {
+  display: inline-block !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  flex: 0 0 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}

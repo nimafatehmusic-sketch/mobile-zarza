@@ -1,1 +1,448 @@
-*{box-sizing:border-box}body{margin:0;background:#f3f6f5;color:#182b28;font-family:Tahoma,Arial,sans-serif;font-size:14px}header{background:#123b35;color:white;padding:22px max(18px,calc((100% - 920px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:21px;margin:0 0 6px}header p{margin:0;color:#c9ddda}.offline{font-size:12px;color:#b9f2d0;white-space:nowrap}main{max-width:920px;margin:18px auto;padding:0 14px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stats div,.panel{background:white;border:1px solid #e1e9e6;border-radius:14px;padding:15px}.stats small{display:block;color:#667773;margin-bottom:8px}.stats b{font-size:23px;color:#176b58}nav{display:flex;gap:8px;margin-bottom:12px;overflow:auto}.tab,button,.filebtn{border:0;border-radius:10px;padding:12px 15px;font:inherit;cursor:pointer;background:#e5eeeb;color:#21423a;white-space:nowrap}.tab.active,.primary{background:#176b58;color:white}.secondary{background:#edf1f0}.panel h2{font-size:18px;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;color:#435650;font-weight:bold;margin-bottom:12px}input,select,textarea{display:block;width:100%;margin-top:7px;padding:12px;border:1px solid #d5e0dc;border-radius:9px;background:#fff;font:inherit;color:#172b26;min-width:0}textarea{resize:vertical}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.search{display:grid;grid-template-columns:1fr 190px;gap:9px;margin-bottom:14px}.records{display:grid;gap:10px}.record{border:1px solid #e0e8e5;border-radius:12px;padding:13px;display:grid;gap:8px}.record-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.record h3{font-size:15px;margin:0}.record strong{font-size:15px}.muted,.hint{color:#71817c;font-size:12px}.status{background:#edf5f1;color:#176b58;border-radius:20px;padding:5px 9px;font-size:12px}.record-actions{display:flex;gap:7px;flex-wrap:wrap}.record-actions button{padding:8px 10px;font-size:12px}.hidden{display:none}.filebtn{display:inline-flex;align-items:center}.filebtn input{display:none}#toast{position:fixed;bottom:18px;left:50%;transform:translate(-50%,12px);background:#173c34;color:white;padding:11px 18px;border-radius:9px;display:none;opacity:0;z-index:9;transition:opacity .2s,transform .2s;max-width:90%;text-align:center}#toast.show{display:block;opacity:1;transform:translate(-50%,0)}dialog{border:0;border-radius:14px;width:min(620px,94vw);padding:22px;box-shadow:0 10px 50px #0003}dialog::backdrop{background:#0007}.invoice-title{text-align:center;border-bottom:1px dashed #888;padding-bottom:12px}.invoice-title h2{margin:0 0 8px}.invoice-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #ddd;padding:9px}.invoice-row span{color:#667}.invoice-total{font-size:18px;font-weight:bold;text-align:left;padding:12px 0}.print-note{text-align:center;color:#666;font-size:12px;margin-top:24px}@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.search{grid-template-columns:1fr}.panel{padding:13px}header{padding:18px 14px}}@media print{body{background:white}body>*:not(#invoice){display:none!important}dialog{display:block!important;position:static;width:100%;max-width:none;box-shadow:none;padding:0}dialog::backdrop,.no-print{display:none!important}#invoiceContent{display:block}}
+/* تنظیمات اصلی */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f3f6f5;
+  color: #182b28;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 14px;
+}
+
+header {
+  background: #123b35;
+  color: white;
+  padding: 22px max(18px, calc((100% - 920px) / 2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+h1 {
+  font-size: 21px;
+  margin: 0 0 6px;
+}
+
+header p {
+  margin: 0;
+  color: #c9ddda;
+}
+
+.offline {
+  font-size: 12px;
+  color: #b9f2d0;
+  white-space: nowrap;
+}
+
+main {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 0 14px;
+}
+
+/* آمار */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stats div,
+.panel {
+  background: white;
+  border: 1px solid #e1e9e6;
+  border-radius: 14px;
+  padding: 15px;
+}
+
+.stats small {
+  display: block;
+  color: #667773;
+  margin-bottom: 8px;
+}
+
+.stats b {
+  font-size: 23px;
+  color: #176b58;
+}
+
+/* منو */
+nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow: auto;
+}
+
+.tab,
+button,
+.filebtn {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 15px;
+  font: inherit;
+  cursor: pointer;
+  background: #e5eeeb;
+  color: #21423a;
+  white-space: nowrap;
+}
+
+.tab.active,
+.primary {
+  background: #176b58;
+  color: white;
+}
+
+.secondary {
+  background: #edf1f0;
+}
+
+/* پنل‌ها */
+.panel h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* فرم‌ها */
+label {
+  display: block;
+  color: #435650;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 12px;
+  border: 1px solid #d5e0dc;
+  border-radius: 9px;
+  background: #fff;
+  font: inherit;
+  color: #172b26;
+  min-width: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* نوع دستگاه */
+.field-block {
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.field-title {
+  display: block;
+  color: #435650;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.device-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.device-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 5px;
+  margin: 0;
+  border: 1px solid #d5e0dc;
+  border-radius: 12px;
+  background: #fff;
+  text-align: center;
+}
+
+.device-option input {
+  width: auto;
+  margin: 0;
+  accent-color: #176b58;
+}
+
+.device-option span {
+  font-size: 25px;
+}
+
+.device-option b {
+  font-size: 12px;
+}
+
+/* نوع تعمیرات و تیک‌ها */
+.repair-types {
+  margin-bottom: 16px;
+}
+
+.repair-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.repair-options label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 11px;
+  margin: 0;
+  min-height: 45px;
+  border: 1px solid #e1e9e6;
+  border-radius: 9px;
+  background: #fff;
+  font-weight: normal;
+}
+
+.repair-options input {
+  display: inline-block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #176b58;
+}
+
+.custom-repair-label {
+  margin-top: 12px;
+}
+
+/* دکمه‌ها */
+.actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* جستجو */
+.search {
+  display: grid;
+  grid-template-columns: 1fr 190px;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+/* لیست تعمیرات */
+.records {
+  display: grid;
+  gap: 10px;
+}
+
+.record {
+  border: 1px solid #e0e8e5;
+  border-radius: 12px;
+  padding: 13px;
+  display: grid;
+  gap: 8px;
+}
+
+.record-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.record h3 {
+  font-size: 15px;
+  margin: 0;
+}
+
+.record strong {
+  font-size: 15px;
+}
+
+.muted,
+.hint {
+  color: #71817c;
+  font-size: 12px;
+}
+
+.status {
+  background: #edf5f1;
+  color: #176b58;
+  border-radius: 20px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.record-actions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.record-actions button {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+/* مخفی‌سازی */
+.hidden {
+  display: none;
+}
+
+.filebtn {
+  display: inline-flex;
+  align-items: center;
+}
+
+.filebtn input {
+  display: none;
+}
+
+/* پیام */
+#toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translate(-50%, 12px);
+  background: #173c34;
+  color: white;
+  padding: 11px 18px;
+  border-radius: 9px;
+  display: none;
+  opacity: 0;
+  z-index: 9;
+  transition: opacity .2s, transform .2s;
+  max-width: 90%;
+  text-align: center;
+}
+
+#toast.show {
+  display: block;
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* فاکتور */
+dialog {
+  border: 0;
+  border-radius: 14px;
+  width: min(620px, 94vw);
+  padding: 22px;
+  box-shadow: 0 10px 50px #0003;
+}
+
+dialog::backdrop {
+  background: #0007;
+}
+
+.invoice-title {
+  text-align: center;
+  border-bottom: 1px dashed #888;
+  padding-bottom: 12px;
+}
+
+.invoice-title h2 {
+  margin: 0 0 8px;
+}
+
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #ddd;
+  padding: 9px;
+}
+
+.invoice-row span {
+  color: #667;
+}
+
+.invoice-total {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+  padding: 12px 0;
+}
+
+.print-note {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 24px;
+}
+
+/* نمایش در گوشی */
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 13px;
+  }
+
+  header {
+    padding: 18px 14px;
+  }
+}
+
+/* گوشی‌های کوچک */
+@media (max-width: 380px) {
+  .device-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .repair-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* چاپ فاکتور */
+@media print {
+  body {
+    background: white;
+  }
+
+  body > *:not(#invoice) {
+    display: none !important;
+  }
+
+  dialog {
+    display: block !important;
+    position: static;
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  dialog::backdrop,
+  .no-print {
+    display: none !important;
+  }
+
+  #invoiceContent {
+    display: block;
+  }
+}

@@ -1,4 +1,3 @@
-
 name: Build Mobile Zarza APK
 
 on:
@@ -38,14 +37,20 @@ jobs:
         run: |
           mkdir -p www
           cp index.html app.js style.css manifest.webmanifest sw.js IMG_20261103_072219_434.png www/
+
+      - name: Build print bridge
+        run: npx --yes esbuild print-bridge.js --bundle --platform=browser --format=iife --outfile=www/print-bridge.bundle.js
+
       - name: Add Android platform
         run: npx cap add android
+
       - name: Generate Android app icons
         run: |
           mkdir -p assets
           cp IMG_20261103_072219_434.png assets/logo.png
           npm install --no-save @capacitor/assets
           npx @capacitor/assets generate --android
+
       - name: Sync Android
         run: npx cap sync android
 

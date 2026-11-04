@@ -17,6 +17,23 @@ function digits(s){
 }
 function faNum(n){
  return Number(n||0).toLocaleString("fa-IR");
+}function moneyValue(id){
+ return Number(digits($(id).value).replace(/[^\d]/g,"")||0);
+}
+
+function formatMoney(value){
+ const raw=digits(value).replace(/[^\d]/g,"");
+ return raw?Number(raw).toLocaleString("fa-IR"):"";
+}
+
+function bindMoneyInput(id){
+ const input=$(id);
+ input.addEventListener("focus",()=>{
+  input.value=digits(input.value).replace(/[^\d]/g,"");
+ });
+ input.addEventListener("blur",()=>{
+  input.value=formatMoney(input.value);
+ });
 }
 const persianFormatter=new Intl.DateTimeFormat("en-US-u-ca-persian-nu-latn",{
  year:"numeric",month:"numeric",day:"numeric",timeZone:"UTC"

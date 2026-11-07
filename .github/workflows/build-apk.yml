@@ -36,7 +36,7 @@ jobs:
       - name: Prepare app files
         run: |
           mkdir -p www
-          cp index.html app.js style.css manifest.webmanifest sw.js IMG_20261103_072219_434.png www/
+          cp index.html app.js style.css manifest.webmanifest sw.js icon-512.png www/
 
       - name: Build print bridge
         run: npx --yes esbuild print-bridge.js --bundle --platform=browser --format=iife --outfile=www/print-bridge.bundle.js
@@ -47,7 +47,7 @@ jobs:
       - name: Generate Android app icons
         run: |
           mkdir -p assets
-          cp IMG_20261103_072219_434.png assets/logo.png
+          cp icon-512.png assets/logo.png
           npm install --no-save @capacitor/assets
           npx @capacitor/assets generate --android
 

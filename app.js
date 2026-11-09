@@ -749,25 +749,6 @@ $("export").addEventListener("click", async () => {
       console.error(error);
       toast("ذخیره فایل پشتیبان ناموفق بود");
     }
-  }
-  const blob = new Blob([
-    JSON.stringify({
-      app: "mobile-zarza",
-      version: 1,
-      repairs
-    }, null, 2)
-  ], { type: "application/json" });
-
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = "mobile-zarza-backup.json";
-  link.click();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  toast("فایل پشتیبان آماده شد");
-});
 
 // بازیابی پشتیبان
 $("importFile").addEventListener("change", async event => {

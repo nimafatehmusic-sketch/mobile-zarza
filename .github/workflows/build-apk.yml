@@ -40,7 +40,8 @@ jobs:
 
       - name: Build print bridge
         run: npx --yes esbuild print-bridge.js --bundle --platform=browser --format=iife --outfile=www/print-bridge.bundle.js
-
+      - name: Build backup bridge
+        run: npx --yes esbuild backup-bridge.js --bundle --platform=browser --format=iife --outfile=www/backup-bridge.bundle.js
       - name: Add Android platform
         run: npx cap add android
 

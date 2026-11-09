@@ -673,14 +673,29 @@ function showInvoice(record) {
     actions.insertBefore(smsButton, actions.firstChild);
   }
 
-  smsButton.onclick = () => {
-    const phone = digits(record.phone).replace(/[^\d+]/g, "");
+  
+smsButton.onclick = () => {
+  const phone = digits(record.phone).replace(/[^\d+]/g, "");
 
-    const message =
-      `مشتری گرامی، دستگاه شما در موبایل زرزا ثبت شد. کد پیگیری شما: ${record.invoice}. این کد را برای پیگیری نزد خود نگه دارید.`;
+  if (!phone) {
+    alert("شماره تماس مشتری معتبر نیست.");
+    return;
+  }
 
-    window.location.href =
-      `sms:${phone}?body=${encodeURIComponent(message)}`;
+  const customerName = (record.customer || "").trim() || "مشتری گرامی";
+  const deviceName = (record.model || record.device || "دستگاه").trim();
+
+  const message =
+    `مشتری گرامی آقا/خانم ${customerName}، ${deviceName} شما در تعمیرات تخصصی زرزا ثبت شد.
+کد پیگیری: ${record.invoice}
+لطفاً این کد را برای پیگیری نزد خود نگه دارید.
+با تشکر از اعتماد شما
+تعمیرات تخصصی زرزا`;
+
+  window.location.href =
+    `sms:${phone}?body=${encodeURIComponent(message)}`;
+};
+
   };
 
   $("invoice").showModal();

@@ -703,6 +703,7 @@ $("closeInvoice").addEventListener("click", () => {
   $("invoice").close();
 });
 
+
 // پشتیبان‌گیری
 $("export").addEventListener("click", async () => {
   try {
@@ -714,43 +715,30 @@ $("export").addEventListener("click", async () => {
 
     const json = JSON.stringify(backupData, null, 2);
 
-    const file = new File(
-      [json],
-      "mobile-zarza-backup.json",
-      { type: "application/json" }
-    );
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: "پشتیبان‌گیری موبایل زرزا",
-        text: "فایل پشتیبان تعمیرات موبایل زرزا"
-      });
-    } else {
-      const blob = new Blob([json], {
-        type: "application/json"
-      });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "mobile-zarza-backup.json";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    if (
+      !window.MobileZarzaBackup ||
+      typeof window.MobileZarzaBackup.save !== "function"
+    ) {
+      throw new Error("امکان ذخیره‌سازی اندروید در دسترس نیست");
     }
 
-    toast("درخواست ذخیره فایل پشتیبان انجام شد");
+    await window.MobileZarzaBackup.save(json);
+
+    toast("فایل پشتیبان آماده شد؛ مقصد ذخیره را انتخاب کنید");
   } catch (error) {
-    if (error.name !== "AbortError") {
+    if (
+      error.name === "AbortError" ||
+      error.message === "Share canceled"
+    ) {
+      toast("ذخیره فایل لغو شد");
+    } else {
       console.error(error);
-      toast("ذخیره فایل پشتیبان ناموفق بود");
+      toast(error.message || "ذخیره فایل پشتیبان ناموفق بود");
     }
   }
 });
+
+
 // بازیابی پشتیبان
 $("importFile").addEventListener("change", async event => {
   const file = event.target.files[0];

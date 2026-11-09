@@ -150,6 +150,124 @@ function toast(message) {
   setTimeout(() => $("toast").classList.remove("show"), 2300);
 }
 
+// =====================================
+// تنظیمات پیامک موبایل زرزا
+// =====================================
+
+const SMS_KEY = "mobile-zarza-sms-v1";
+
+const defaultSmsTemplates = {
+  review: "مشتری گرامی {customer}، دستگاه {model} شما در تعمیرات تخصصی زرزا در حال بررسی است. شماره فاکتور: {invoice}",
+  repair: "مشتری گرامی {customer}، تعمیر دستگاه {model} شما در زرزا آغاز شده است. شماره فاکتور: {invoice}",
+  ready: "مشتری گرامی {customer}، تعمیر دستگاه {model} شما به پایان رسیده و آماده تحویل است. شماره فاکتور: {invoice}"
+};
+
+// خواندن متن‌های ذخیره‌شده
+function getSmsTemplates() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(SMS_KEY) || "{}"
+    );
+
+    return {
+      ...defaultSmsTemplates,
+      ...saved
+    };
+  } catch {
+    return { ...defaultSmsTemplates };
+  }
+}
+
+// نمایش متن‌ها در تنظیمات
+function loadSmsSettings() {
+  const templates = getSmsTemplates();
+
+  $("smsReview").value = templates.review;
+  $("smsRepair").value = templates.repair;
+  $("smsReady").value = templates.ready;
+}
+
+// ذخیره متن‌های جدید
+function saveSmsTemplates() {
+  const templates = {
+    review: $("smsReview").value.trim(),
+    repair: $("smsRepair").value.trim(),
+    ready: $("smsReady").value.trim()
+  };
+
+  if (!templates.review || !templates.repair || !templates.ready) {
+    alert("لطفاً متن هر سه پیامک را وارد کنید.");
+    return;
+  }
+
+  localStorage.setItem(
+    SMS_KEY,
+    JSON.stringify(templates)
+  );
+
+  toast("تنظیمات پیامک ذخیره شد");
+}
+
+// دکمه ذخیره تنظیمات
+$("saveSms").addEventListener("click", saveSmsTemplates);
+
+// بازگرداندن متن‌های پیش‌فرض
+$("resetSms").addEventListener("click", () => {
+  if (!confirm("متن هر سه پیامک به حالت پیش‌فرض برگردد؟")) {
+    return;
+  }
+
+  localStorage.removeItem(SMS_KEY);
+  loadSmsSettings();
+
+  toast("متن‌های پیش‌فرض بازگردانده شدند");
+});
+
+// آماده‌سازی پیامک متناسب با وضعیت تعمیر
+function prepareStatusSms(record) {
+  const templates = getSmsTemplates();
+
+  const templateByStatus = {
+    "در انتظار بررسی": templates.review,
+    "در حال تعمیر": templates.repair,
+    "آماده تحویل": templates.ready
+  };
+
+  const template = templateByStatus[record.status];
+
+  // برای وضعیت تحویل‌شده پیامک آماده نمی‌کنیم
+  if (!template) return;
+
+  const phone = digits(record.phone).replace(/[^\d+]/g, "");
+
+  if (!phone) {
+    alert("شماره تماس مشتری معتبر نیست.");
+    return;
+  }
+
+  const values = {
+    customer: record.customer || "",
+    invoice: record.invoice || "",
+    model: record.model || record.device || "",
+    status: record.status || "",
+    phone: record.phone || ""
+  };
+
+  const message = template.replace(
+    /\{(customer|invoice|model|status|phone)\}/g,
+    (_, key) => values[key]
+  );
+
+  if (
+    confirm(
+      "وضعیت تعمیر تغییر کرده است. پیامک برای مشتری آماده شود؟"
+    )
+  ) {
+    window.location.href =
+      `sms:${phone}?body=${encodeURIComponent(message)}`;
+  }
+}
+
 function newInvoice() {
   return "MZ-" + Date.now().toString().slice(-8);
 }

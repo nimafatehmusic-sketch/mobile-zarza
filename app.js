@@ -420,7 +420,7 @@ document.querySelectorAll(".tab").forEach(button => {
       item.classList.toggle("active", item === button);
     });
 
-    ["new", "list", "backup"].forEach(id => {
+    ["new", "list", "backup", "sms"].forEach(id => {
       $(id).classList.toggle("hidden", id !== button.dataset.tab);
     });
 

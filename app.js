@@ -478,10 +478,16 @@ $("repairForm").addEventListener("submit", event => {
       repairs.push(record);
     }
 
-    save();
-    resetForm();
+  save();
 
-    toast(old
+// فقط هنگام ویرایش و تغییر واقعی وضعیت، پیامک آماده می‌شود.
+if (old && old.status !== record.status) {
+  prepareStatusSms(record);
+}
+
+resetForm();
+
+toast(old
       ? "اطلاعات ویرایش شد"
       : "تعمیر با شماره فاکتور " + record.invoice + " ثبت شد"
     );

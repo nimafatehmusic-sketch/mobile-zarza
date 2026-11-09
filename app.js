@@ -696,8 +696,6 @@ smsButton.onclick = () => {
     `sms:${phone}?body=${encodeURIComponent(message)}`;
 };
 
-  };
-
   $("invoice").showModal();
 }
 

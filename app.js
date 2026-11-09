@@ -749,7 +749,8 @@ $("export").addEventListener("click", async () => {
       console.error(error);
       toast("ذخیره فایل پشتیبان ناموفق بود");
     }
-
+  }
+});
 // بازیابی پشتیبان
 $("importFile").addEventListener("change", async event => {
   const file = event.target.files[0];

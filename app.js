@@ -750,8 +750,6 @@ $("export").addEventListener("click", async () => {
       toast("ذخیره فایل پشتیبان ناموفق بود");
     }
   }
-});
-$("export").addEventListener("click", () => {
   const blob = new Blob([
     JSON.stringify({
       app: "mobile-zarza",

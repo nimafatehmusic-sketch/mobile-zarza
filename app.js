@@ -742,6 +742,7 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
 }
 
 // شروع برنامه
+loadSmsSettings();
 $("received").value = todayJalali();
 $("deliveredDate").value = $("received").value;
 $("device").value = selectedDevice();

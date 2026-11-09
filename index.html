@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
@@ -9,53 +10,77 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header>
-<div><h1>تعمیرات تخصصی زرزا</h1><p>سیستم مدیریت تعمیرات موبایل و تبلت و لپ‌تاپ</p></div>
+<div>
+<h1>تعمیرات تخصصی زرزا</h1>
+<p>سیستم مدیریت تعمیرات موبایل و تبلت و لپ‌تاپ</p>
+</div>
 <span class="offline">● آفلاین</span>
 </header>
+
 <main>
+
 <section class="stats">
 <div><small>کل پذیرش‌ها</small><b id="total">۰</b></div>
 <div><small>در حال تعمیر</small><b id="working">۰</b></div>
 <div><small>آماده تحویل</small><b id="ready">۰</b></div>
 <div><small>تحویل‌شده</small><b id="delivered">۰</b></div>
 </section>
+
 <nav>
 <button class="tab active" data-tab="new">＋ ثبت تعمیر</button>
 <button class="tab" data-tab="list">فهرست تعمیرات</button>
 <button class="tab" data-tab="backup">پشتیبان‌گیری</button>
+<button class="tab" data-tab="sms">تنظیمات پیامک</button>
 </nav>
+
 <section id="new" class="panel">
 <h2 id="formTitle">ثبت پذیرش جدید</h2>
+
 <form id="repairForm">
 <input type="hidden" id="editId">
+
 <div class="grid">
-<label>نام مراجعه‌کننده *<input id="customer" required placeholder="نام و نام خانوادگی"></label>
-<label>شماره تماس *<input id="phone" required inputmode="tel" placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷"></label>
+
+<label>نام مراجعه‌کننده *
+<input id="customer" required placeholder="نام و نام خانوادگی">
+</label>
+
+<label>شماره تماس *
+<input id="phone" required inputmode="tel" placeholder="مثلاً ۰۹۱۲۱۲۳۴۵۶۷">
+</label>
 
 <div class="field-block">
 <span class="field-title">نوع دستگاه *</span>
 <div class="device-options">
+
 <label class="device-option">
 <input type="radio" name="deviceChoice" value="گوشی موبایل" checked>
 <span>📱</span><b>گوشی موبایل</b>
 </label>
+
 <label class="device-option">
 <input type="radio" name="deviceChoice" value="تبلت">
 <span>📱</span><b>تبلت</b>
 </label>
+
 <label class="device-option">
 <input type="radio" name="deviceChoice" value="لپ‌تاپ">
 <span>💻</span><b>لپ‌تاپ</b>
 </label>
+
 </div>
 <input type="hidden" id="device" value="گوشی موبایل">
 </div>
 
-<label>برند و مدل<input id="model" placeholder="مثلاً Samsung A54"></label>
+<label>برند و مدل
+<input id="model" placeholder="مثلاً Samsung A54">
+</label>
 
 <div class="field-block repair-types">
 <span class="field-title">نوع تعمیر / خدمات انجام‌شده *</span>
+
 <div class="repair-options">
 <label><input type="checkbox" class="repair-option" value="تعویض ال‌سی‌دی"> تعویض ال‌سی‌دی</label>
 <label><input type="checkbox" class="repair-option" value="تعویض باتری"> تعویض باتری</label>
@@ -68,37 +93,58 @@
 <label><input type="checkbox" class="repair-option" value="تعویض دوربین"> تعویض دوربین</label>
 <label><input type="checkbox" class="repair-option" value="تعمیر اسپیکر"> تعمیر اسپیکر</label>
 </div>
-<label class="custom-repair-label">سایر خدمات / توضیح دلخواه
+
+<label class="custom-repair-label">
+سایر خدمات / توضیح دلخواه
 <input id="repairTypeCustom" placeholder="در صورت نیاز بنویسید">
 </label>
 </div>
 
-<label>وضعیت<select id="status">
+<label>وضعیت
+<select id="status">
 <option>در انتظار بررسی</option>
 <option>در حال تعمیر</option>
 <option>آماده تحویل</option>
 <option>تحویل‌شده</option>
-</select></label>
+</select>
+</label>
 
-<label>تاریخ پذیرش (شمسی)<input id="received" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲" required></label>
-<label>تاریخ تحویل (شمسی)<input id="deliveredDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲"></label>
-<label>هزینه (تومان)<input id="price" type="text" inputmode="numeric" autocomplete="off" placeholder="۰"></label>
-<label>مبلغ پرداخت‌شده (تومان)<input id="paid" type="text" inputmode="numeric" autocomplete="off" placeholder="۰"></label>
+<label>تاریخ پذیرش (شمسی)
+<input id="received" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲" required>
+</label>
+
+<label>تاریخ تحویل (شمسی)
+<input id="deliveredDate" type="text" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۱۲">
+</label>
+
+<label>هزینه (تومان)
+<input id="price" type="text" inputmode="numeric" autocomplete="off" placeholder="۰">
+</label>
+
+<label>مبلغ پرداخت‌شده (تومان)
+<input id="paid" type="text" inputmode="numeric" autocomplete="off" placeholder="۰">
+</label>
+
 </div>
 
-<label>شرح ایراد / توضیحات<textarea id="notes" rows="3" placeholder="شرح خرابی، قطعات تعویض‌شده و توضیحات..."></textarea></label>
+<label>شرح ایراد / توضیحات
+<textarea id="notes" rows="3" placeholder="شرح خرابی، قطعات تعویض‌شده و توضیحات..."></textarea>
+</label>
 
 <div class="actions">
 <button class="primary" type="submit">ذخیره اطلاعات</button>
 <button type="button" id="reset" class="secondary">پاک کردن فرم</button>
 </div>
+
 </form>
 </section>
 
 <section id="list" class="panel hidden">
 <h2>فهرست تعمیرات</h2>
+
 <div class="search">
 <input id="search" placeholder="جستجو نام، شماره مشتری، فاکتور یا نوع تعمیر...">
+
 <select id="filter">
 <option value="">همه وضعیت‌ها</option>
 <option>در انتظار بررسی</option>
@@ -107,30 +153,89 @@
 <option>تحویل‌شده</option>
 </select>
 </div>
+
 <div id="records" class="records"></div>
 </section>
 
 <section id="backup" class="panel hidden">
 <h2>پشتیبان‌گیری و بازیابی</h2>
-<p>اطلاعات فقط روی همین گوشی ذخیره می‌شود. برای جلوگیری از ازدست‌رفتن سوابق، مرتباً فایل پشتیبان بگیرید و آن را در جای امن نگه دارید.</p>
+
+<p>
+اطلاعات فقط روی همین گوشی ذخیره می‌شود.
+برای جلوگیری از ازدست‌رفتن سوابق، مرتباً فایل پشتیبان بگیرید و آن را در جای امن نگه دارید.
+</p>
+
 <div class="actions">
 <button id="export" class="primary">دانلود نسخه پشتیبان</button>
-<label class="filebtn">بازیابی از فایل<input type="file" id="importFile" accept="application/json"></label>
+<label class="filebtn">
+بازیابی از فایل
+<input type="file" id="importFile" accept="application/json">
+</label>
 </div>
-<p class="hint">توجه: پاک‌کردن داده‌های مرورگر یا حذف برنامه ممکن است اطلاعات ذخیره‌شده را پاک کند.</p>
+
+<p class="hint">
+توجه: پاک‌کردن داده‌های مرورگر یا حذف برنامه ممکن است اطلاعات ذخیره‌شده را پاک کند.
+</p>
 </section>
+
+<section id="sms" class="panel hidden">
+<h2>تنظیمات پیامک زرزا</h2>
+
+<p>متن پیامک‌های مشتری را می‌توانی هر زمان از این قسمت تغییر بدهی.</p>
+
+<label>
+پیامک وضعیت بررسی
+<textarea id="smsReview" rows="4"></textarea>
+</label>
+
+<label>
+پیامک شروع تعمیر
+<textarea id="smsRepair" rows="4"></textarea>
+</label>
+
+<label>
+پیامک آماده تحویل
+<textarea id="smsReady" rows="4"></textarea>
+</label>
+
+<p class="hint">
+متغیرهای قابل استفاده در متن پیامک:
+{customer} نام مشتری،
+{invoice} شماره فاکتور،
+{model} مدل دستگاه،
+{status} وضعیت تعمیر،
+{phone} شماره تماس مشتری.
+</p>
+
+<div class="actions">
+<button type="button" class="primary" id="saveSms">
+ذخیره تنظیمات پیامک
+</button>
+
+<button type="button" class="secondary" id="resetSms">
+بازگشت به متن پیش‌فرض
+</button>
+</div>
+</section>
+
 </main>
 
 <div id="toast" role="status"></div>
+
 <dialog id="invoice">
 <div id="invoiceContent"></div>
+
 <div class="actions no-print">
-<button onclick="window.MobileZarzaPrint().catch(() => alert('چاپ انجام نشد؛ دوباره تلاش کنید.'))" class="primary">چاپ / ذخیره PDF</button>
+<button onclick="window.MobileZarzaPrint().catch(() => alert('چاپ انجام نشد؛ دوباره تلاش کنید.'))" class="primary">
+چاپ / ذخیره PDF
+</button>
+
 <button id="closeInvoice" class="secondary">بستن</button>
 </div>
 </dialog>
 
 <script src="print-bridge.bundle.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>

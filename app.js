@@ -704,6 +704,53 @@ $("closeInvoice").addEventListener("click", () => {
 });
 
 // پشتیبان‌گیری
+$("export").addEventListener("click", async () => {
+  try {
+    const backupData = {
+      app: "mobile-zarza",
+      version: 1,
+      repairs
+    };
+
+    const json = JSON.stringify(backupData, null, 2);
+
+    const file = new File(
+      [json],
+      "mobile-zarza-backup.json",
+      { type: "application/json" }
+    );
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: "پشتیبان‌گیری موبایل زرزا",
+        text: "فایل پشتیبان تعمیرات موبایل زرزا"
+      });
+    } else {
+      const blob = new Blob([json], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "mobile-zarza-backup.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    }
+
+    toast("درخواست ذخیره فایل پشتیبان انجام شد");
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      console.error(error);
+      toast("ذخیره فایل پشتیبان ناموفق بود");
+    }
+  }
+});
 $("export").addEventListener("click", () => {
   const blob = new Blob([
     JSON.stringify({

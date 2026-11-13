@@ -88,20 +88,6 @@ jobs:
               }
           }
           EOF
-          
-          package ir.mobilezarza.app;
-
-          import android.os.Bundle;
-          import com.getcapacitor.BridgeActivity;
-
-          public class MainActivity extends BridgeActivity {
-              @Override
-              public void onCreate(Bundle savedInstanceState) {
-                  registerPlugin(SaveFilePlugin.class);
-                  super.onCreate(savedInstanceState);
-              }
-          }
-          EOF
 
       - name: Generate Android app icons
         run: |

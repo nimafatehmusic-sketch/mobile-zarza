@@ -1,27 +1,21 @@
 
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
-import { Share } from "@capacitor/share";
+import { registerPlugin } from "@capacitor/core";
+
+const SaveFile = registerPlugin("SaveFile");
 
 window.MobileZarzaBackup = {
   async save(json) {
     const date = new Date().toISOString().slice(0, 10);
     const fileName = `mobile-zarza-backup-${date}.json`;
 
-    const saved = await Filesystem.writeFile({
-      path: fileName,
-      data: json,
-      directory: Directory.Cache,
-      encoding: Encoding.UTF8,
-      recursive: true
+    const result = await SaveFile.save({
+      fileName,
+      content: json
     });
 
-    await Share.share({
-      title: "پشتیبان‌گیری موبایل زرزا",
-      text: "فایل پشتیبان موبایل زرزا",
-      url: saved.uri,
-      dialogTitle: "ذخیره نسخه پشتیبان"
-    });
-
-    return fileName;
+    return {
+      fileName,
+      uri: result.uri
+    };
   }
 };

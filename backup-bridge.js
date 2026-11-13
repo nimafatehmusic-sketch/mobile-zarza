@@ -1,5 +1,5 @@
 
-import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 
 window.MobileZarzaBackup = {
@@ -11,6 +11,7 @@ window.MobileZarzaBackup = {
       path: fileName,
       data: json,
       directory: Directory.Cache,
+      encoding: Encoding.UTF8,
       recursive: true
     });
 

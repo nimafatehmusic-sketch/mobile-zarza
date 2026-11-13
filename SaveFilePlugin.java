@@ -4,10 +4,9 @@ package ir.mobilezarza.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
-import com.getcapacitor.ActivityResult;
+import androidx.activity.result.ActivityResult;
+
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -15,11 +14,15 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 @CapacitorPlugin(name = "SaveFile")
 public class SaveFilePlugin extends Plugin {
 
     @PluginMethod
     public void save(PluginCall call) {
+
         String fileName = call.getString("fileName");
 
         if (fileName == null || fileName.trim().isEmpty()) {
@@ -35,11 +38,18 @@ public class SaveFilePlugin extends Plugin {
     }
 
     @ActivityCallback
-    private void handleSaveResult(PluginCall call, ActivityResult result) {
-        if (call == null) return;
+    private void handleSaveResult(
+        PluginCall call,
+        ActivityResult result
+    ) {
 
-        if (result.getResultCode() != Activity.RESULT_OK ||
-            result.getData() == null) {
+        if (call == null) {
+            return;
+        }
+
+        if (result.getResultCode() != Activity.RESULT_OK
+            || result.getData() == null) {
+
             call.reject("ذخیره فایل لغو شد");
             return;
         }
@@ -53,10 +63,17 @@ public class SaveFilePlugin extends Plugin {
 
         try {
             String content = call.getString("content");
-            if (content == null) content = "";
 
-            try (OutputStream output =
-                getContext().getContentResolver().openOutputStream(uri)) {
+            if (content == null) {
+                content = "";
+            }
+
+            try (
+                OutputStream output =
+                    getContext()
+                    .getContentResolver()
+                    .openOutputStream(uri)
+            ) {
 
                 if (output == null) {
                     throw new IllegalStateException(
@@ -64,17 +81,23 @@ public class SaveFilePlugin extends Plugin {
                     );
                 }
 
-                output.write(content.getBytes(StandardCharsets.UTF_8));
+                output.write(
+                    content.getBytes(StandardCharsets.UTF_8)
+                );
+
                 output.flush();
             }
 
             JSObject response = new JSObject();
             response.put("uri", uri.toString());
+
             call.resolve(response);
 
         } catch (Exception error) {
+
             call.reject(
-                "ذخیره نسخه پشتیبان انجام نشد: " + error.getMessage(),
+                "ذخیره نسخه پشتیبان انجام نشد: "
+                + error.getMessage(),
                 error
             );
         }

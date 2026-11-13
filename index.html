@@ -220,6 +220,216 @@
 
 </main>
 
+<style>
+#dailyMotivation {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(0, 20, 17, .72);
+  backdrop-filter: blur(7px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s ease, visibility .35s ease;
+}
+
+#dailyMotivation.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#dailyMotivation .motivation-card {
+  width: 100%;
+  max-width: 390px;
+  position: relative;
+  padding: 34px 24px 26px;
+  text-align: center;
+  color: #fff;
+  border: 2px solid #d7b65d;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #174b40, #092c27);
+  box-shadow: 0 18px 55px rgba(0,0,0,.4);
+  transform: translateY(35px) scale(.94);
+  transition: transform .45s cubic-bezier(.2,.8,.2,1);
+}
+
+#dailyMotivation.show .motivation-card {
+  transform: translateY(0) scale(1);
+}
+
+#dailyMotivation .close-motivation {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 27px;
+  cursor: pointer;
+}
+
+#dailyMotivation .motivation-icon {
+  font-size: 43px;
+  margin-bottom: 12px;
+}
+
+#dailyMotivation h2 {
+  color: #f2d47e;
+  font-size: 23px;
+  margin: 8px 0 12px;
+}
+
+#dailyMotivation .motivation-label {
+  color: #e4c779;
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+
+#dailyMotivation .motivation-message {
+  font-size: 17px;
+  line-height: 2.1;
+  min-height: 95px;
+  margin: 12px 0 22px;
+}
+
+#dailyMotivation .start-motivation {
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  padding: 13px;
+  background: linear-gradient(90deg, #d9b65b, #f2d98f);
+  color: #173b32;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#dailyMotivation .motivation-footer {
+  color: #c9d9d1;
+  font-size: 11px;
+  margin-top: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dailyMotivation,
+  #dailyMotivation .motivation-card {
+    transition: none;
+  }
+}
+</style>
+
+<div id="dailyMotivation" aria-hidden="true">
+  <div class="motivation-card" role="dialog"
+       aria-modal="true" aria-labelledby="motivationTitle">
+
+    <button class="close-motivation"
+            type="button" aria-label="بستن">×</button>
+
+    <div class="motivation-icon">✨</div>
+
+    <h2 id="motivationTitle">صبح بخیر، مدیر زرزا!</h2>
+
+    <div class="motivation-label">پیام انگیزشی امروز</div>
+
+    <div class="motivation-message" id="motivationMessage"></div>
+
+    <button class="start-motivation" type="button">
+      شروع کنیم 🚀
+    </button>
+
+    <div class="motivation-footer">
+      موبایل زرزا | هر روز یک قدم به موفقیت نزدیک‌تر
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const messages = [
+    "موفقیت نتیجه قدم‌های کوچکی است که هر روز با پشتکار برمی‌داری.",
+    "امروز فرصت تازه‌ای است برای ساختن فردایی بهتر.",
+    "به توانایی‌هایت ایمان داشته باش؛ تو می‌توانی.",
+    "هیچ پیشرفتی کوچک نیست؛ هر قدم ارزشمند است.",
+    "کیفیت کار تو، امضای شخصیت حرفه‌ای توست.",
+    "برای موفقیت لازم نیست عجله کنی؛ فقط متوقف نشو.",
+    "هر مشکلی فرصتی برای یادگیری و قوی‌تر شدن است.",
+    "به جای نگرانی درباره مسیر، قدم بعدی را محکم بردار.",
+    "تلاش امروز تو، آرامش فردای تو را می‌سازد.",
+    "بهترین تبلیغ برای کسب‌وکارت، رضایت مشتری است.",
+    "با نظم، صبر و پشتکار می‌توانی به قله برسی.",
+    "امروز را با انرژی شروع کن و با رضایت به پایان برسان.",
+    "آینده متعلق به کسانی است که برایش تلاش می‌کنند.",
+    "هر روز بهتر از دیروز؛ این راز پیشرفت است.",
+    "کار خوب، با عشق و دقت ساخته می‌شود.",
+    "به مسیرت اعتماد کن؛ نتیجه تلاش‌هایت خواهد رسید.",
+    "محدودیت‌ها پایان راه نیستند؛ شروع خلاقیت‌اند.",
+    "موفقیت از جایی شروع می‌شود که تسلیم نمی‌شوی.",
+    "مشتری راضی، ارزشمندترین سرمایه کسب‌وکار توست.",
+    "با آرامش تصمیم بگیر و با قدرت اجرا کن.",
+    "برای رسیدن به هدف، استمرار از سرعت مهم‌تر است.",
+    "امروز یک فرصت تازه برای درخشیدن است.",
+    "به جای مقایسه خودت با دیگران، با دیروز خودت رقابت کن.",
+    "هر روز چیزی یاد بگیر و هر روز حرفه‌ای‌تر شو.",
+    "اعتماد مشتری با صداقت و کیفیت ساخته می‌شود.",
+    "روی چیزی تمرکز کن که می‌توانی امروز بهتر انجام دهی.",
+    "آدم‌های موفق از شکست‌ها درس می‌گیرند.",
+    "با انگیزه شروع کن، با تعهد ادامه بده.",
+    "رویاها با برنامه‌ریزی و عمل به واقعیت تبدیل می‌شوند.",
+    "تو برای ساختن یک کسب‌وکار موفق قدم برداشته‌ای؛ ادامه بده."
+  ];
+
+  const modal = document.getElementById("dailyMotivation");
+  if (!modal) return;
+
+  const messageBox = document.getElementById("motivationMessage");
+  const startButton = modal.querySelector(".start-motivation");
+  const closeButton = modal.querySelector(".close-motivation");
+
+  // انتخاب پیام ثابت بر اساس روز سال
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const dayNumber = Math.floor(
+    (now - startOfYear) / 86400000
+  );
+
+  messageBox.textContent = messages[
+    (dayNumber - 1) % messages.length
+  ];
+
+  function closeModal() {
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function openModal() {
+    modal.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      modal.classList.add("show");
+    });
+  }
+
+  startButton.addEventListener("click", closeModal);
+  closeButton.addEventListener("click", closeModal);
+
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) closeModal();
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" &&
+        modal.classList.contains("show")) {
+      closeModal();
+    }
+  });
+
+  // نمایش در هر بار بازشدن برنامه
+  openModal();
+})();
+    </script>
+  
 <div id="toast" role="status"></div>
 
 <dialog id="invoice">

@@ -54,7 +54,41 @@ jobs:
 
           cp SaveFilePlugin.java android/app/src/main/java/ir/mobilezarza/app/SaveFilePlugin.java
 
+          
           cat > android/app/src/main/java/ir/mobilezarza/app/MainActivity.java <<'EOF'
+          package ir.mobilezarza.app;
+
+          import android.os.Bundle;
+          import android.app.AlertDialog;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(SaveFilePlugin.class);
+                  super.onCreate(savedInstanceState);
+
+                  getOnBackPressedDispatcher().addCallback(
+                      this,
+                      new androidx.activity.OnBackPressedCallback(true) {
+                          @Override
+                          public void handleOnBackPressed() {
+
+                              new AlertDialog.Builder(MainActivity.this)
+                                  .setTitle("خروج از موبایل زرزا")
+                                  .setMessage("آیا مطمئن هستید که می‌خواهید از برنامه خارج شوید؟")
+                                  .setPositiveButton("بله، خروج", (dialog, which) -> finish())
+                                  .setNegativeButton("خیر، ادامه کار", (dialog, which) -> dialog.dismiss())
+                                  .setCancelable(true)
+                                  .show();
+                          }
+                      }
+                  );
+              }
+          }
+          EOF
+          
           package ir.mobilezarza.app;
 
           import android.os.Bundle;

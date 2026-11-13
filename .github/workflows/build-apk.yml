@@ -1,3 +1,4 @@
+
 name: Build Mobile Zarza APK
 
 on:
@@ -40,10 +41,33 @@ jobs:
 
       - name: Build print bridge
         run: npx --yes esbuild print-bridge.js --bundle --platform=browser --format=iife --outfile=www/print-bridge.bundle.js
+
       - name: Build backup bridge
         run: npx --yes esbuild backup-bridge.js --bundle --platform=browser --format=iife --outfile=www/backup-bridge.bundle.js
+
       - name: Add Android platform
         run: npx cap add android
+
+      - name: Add native SaveFile plugin
+        run: |
+          mkdir -p android/app/src/main/java/ir/mobilezarza/app
+
+          cp SaveFilePlugin.java android/app/src/main/java/ir/mobilezarza/app/SaveFilePlugin.java
+
+          cat > android/app/src/main/java/ir/mobilezarza/app/MainActivity.java <<'EOF'
+          package ir.mobilezarza.app;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(SaveFilePlugin.class);
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          EOF
 
       - name: Generate Android app icons
         run: |
@@ -66,3 +90,4 @@ jobs:
         with:
           name: mobile-zarza-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          
